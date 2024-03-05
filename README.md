@@ -1,5 +1,5 @@
 <h2 aligh="center">
- Seguimos com a instalação Bare Metal do PnetLab, onde você pode acompanhar todos os passos através do vídeo no https://youtube.com/SanderEthx
+ Seguimos com a instalação Bare Metal do PnetLab, onde você pode acompanhar todos os passos através do vídeo no Youtube [CLICANDO AQUI!](https://www.youtube.com/watch?v=6XcsoaGveW4)
 </h2>
 
 ## 📚 Sumário
