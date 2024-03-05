@@ -1,6 +1,3 @@
-# pnetlabv6
-HTML
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
