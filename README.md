@@ -1,7 +1,10 @@
+HTML
+
 <!DOCTYPE html>
-<html lang="pt-BR">   <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalação do PNETLAB V6 - SanderEthx</title>
+<html lang="pt-BR">
+<head>
+    Instalação do PNETLAB V6 - SanderEthx
+</head>
 <body>
     <div class="container">
         <h1>Instalação do PNETLAB V6</h1>
@@ -20,3 +23,4 @@
     </div>
 </body>
 </html>
+Código gerado por IA. Examine e use com cuidado. Mais informações em perguntas frequentes.
