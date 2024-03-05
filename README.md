@@ -3,10 +3,6 @@ HTML
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalação do PNETLAB V6 - SanderEthx</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,6 +37,10 @@ HTML
             text-decoration: none;
         }
     </style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalação do PNETLAB V6 - SanderEthx</title>
 </head>
 <body>
     <div class="container">
