@@ -65,7 +65,7 @@ print(" echo '127.0.0.127 xml.cisco.com' >> /etc/hosts\n")
 
 Você pode realizar a instalação do Client Pack e acessar os ativos do laboratório através de softwares como MobaXTerm ou Putty.
 
-***[CLIQUE AQUI](https://github.com/sanderethx/pnetlabv6/blob/main/Instala%C3%A7%C3%A3o%20Client%20Pack.md)&*** para acessar o guia.
+***[CLIQUE AQUI](https://github.com/sanderethx/pnetlabv6/blob/main/Instala%C3%A7%C3%A3o%20Client%20Pack.md)*** para acessar o guia.
 
 ## 🚀 Referências<a id="Ref"></a>
 - **LABHUB:** https://labhub.eu.org
