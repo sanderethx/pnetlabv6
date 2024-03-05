@@ -1,0 +1,34 @@
+Windows Registry Editor Version 5.00
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\MobaXterm.telnet]
+ @="telnet"
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\MobaXterm.telnet\DefaultIcon]
+ @="C:\\Program Files (x86)\\Mobatek\\MobaXterm\\MobaXterm.exe, 0"
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\MobaXterm.telnet\shell]
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\MobaXterm.telnet\shell\open]
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\MobaXterm.telnet\shell\open\command]
+ @="\"C:\\Program Files\\EVE-NG\\pnetlab_ethx_mobaxterm.bat\" %1"
+
+ [HKEY_CURRENT_USER\SOFTWARE\MobaXterm]
+
+ [HKEY_CURRENT_USER\SOFTWARE\MobaXterm\Capabilities]
+
+ [HKEY_CURRENT_USER\SOFTWARE\MobaXterm\Capabilities\URLAssociations]
+ "telnet"="MobaXterm.telnet"
+
+ [HKEY_CURRENT_USER\SOFTWARE\RegisteredApplications]
+ "MobaXterm"="Software\\MobaXterm\\Capabilities"
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\telnet\shell]
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\telnet\shell\open]
+
+ [HKEY_CURRENT_USER\SOFTWARE\Classes\telnet\shell\open\command]
+ @="\"C:\\Program Files\\EVE-NG\\pnetlab_ethx_mobaxterm.bat\" %1"
+
+ [Computer\HKEY_CLASSES_ROOT\telnet\shell\open\command]
+ @="\"C:\\Program Files\\EVE-NG\\pnetlab_ethx_mobaxterm.bat\" %1"
