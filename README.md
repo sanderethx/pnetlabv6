@@ -11,7 +11,7 @@
 
 ## 🚀 Instalação PNETLAB<a id="Pnetlab"></a>
 
-💎 Realize o Download do Ubuntu Server 20.04.6 LTS
+- 💎 Realize o Download do Ubuntu Server 20.04.6 LTS
 ```linux
 https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso
 ```
