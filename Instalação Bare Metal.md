@@ -2,7 +2,6 @@
 <body>
     <div class="container">
         <h1>Instalação do PNETLAB V6</h1>
-        <p><strong>SanderEthx</strong></p>
         <p>Assista ao tutorial no <a href="https://www.youtube.com/SanderEthx" target="_blank">Youtube.com/SanderEthx</a></p>
         <ol>
             <li>Download do <a href="https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso" target="_blank">ubuntu-20.04.6-live-server-amd64.iso</a></li>
@@ -15,5 +14,6 @@
         <li>Baixe o <a href="https://github.com/obscur95/gns3-server/blob/master/IOU/CiscoIOUKeygen.py" target="_blank">CiscoIOUKeygen.py</a> para gerar chaves para o Cisco IOU.</li>
          </ol>
     </div>
+            <p><strong>By SanderEthx</strong></p>
 </body>
 </html>
