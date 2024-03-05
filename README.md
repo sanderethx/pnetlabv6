@@ -12,7 +12,6 @@
         <code>bash -c "$(curl -sL https://labhub.eu.org/api/raw/?path=/UNETLAB%20I/upgrades_pnetlab/Focal/install_pnetlab_v6.sh)"</code>
         <li>Para instalar o <a href="https://github.com/ishare2-org/" target="_blank">ishare2</a>, siga as instruções no <a href="https://github.com/ishare2-org/ishare2-cli/blob/main/README.md" target="_blank">README</a>:</li>
         <code>wget -O /usr/sbin/ishare2 https://raw.githubusercontent.com/ishare2-org/ishare2-cli/main/ishare2 && chmod +x /usr/sbin/ishare2 && ishare2</code>
-             </ol>
         <li>Baixe o <a href="https://github.com/obscur95/gns3-server/blob/master/IOU/CiscoIOUKeygen.py" target="_blank">CiscoIOUKeygen.py</a> para gerar chaves para o Cisco IOU.</li>
          </ol>
     </div>
