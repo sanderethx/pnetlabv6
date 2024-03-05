@@ -1,10 +1,4 @@
-HTML
-
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    Instalação do PNETLAB V6 - SanderEthx
-</head>
 <body>
     <div class="container">
         <h1>Instalação do PNETLAB V6</h1>
