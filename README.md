@@ -1,3 +1,7 @@
+<h2 aligh="center">
+ Seguimos com a instalação Bare Metal do PnetLab, onde você pode acompanhar todos os passos através do vídeo no https://youtube.com/SanderEthx
+</h2>
+
 ## 📚 Sumário
 
 - [🚀 Instalação PnetLab](#Pnetlab)
@@ -7,32 +11,26 @@
 
 ## 🚀 Instalação PNETLAB<a id="Pnetlab"></a>
 
-Seguimos com a instalação Bare Metal do PnetLab, onde você pode acompanhar todos os passos através do vídeo no https://youtube.com/SanderEthx
-
 💎 Realize o Download do Ubuntu Server 20.04.6 LTS
-
 ```linux
 https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso
 ```
 
-💎 Instale o Ubuntu Server em um ambiente bare metal ou virtualizado (Proxmox, VMware ESXi, VMware Workstation, VirtualBox, QEMU, etc.)
-
-💎 Atualize o Sistema Operacional
-
-💎 Realize a instalação do PnetLab através do comando:
-
+- 💎 Instale o Ubuntu Server em um ambiente bare metal ou virtualizado (Proxmox, VMware ESXi, VMware Workstation, VirtualBox, QEMU, etc.)
+- 💎 Atualize o Sistema Operacional
+- 💎 Realize a instalação do PnetLab através do comando:
 ```linux
 bash -c "$(curl -sL https://labhub.eu.org/api/raw/?path=/UNETLAB%20I/upgrades_pnetlab/Focal/install_pnetlab_v6.sh)"
 ```
 
 ## 🚀 Instalação do Ishare2<a id="Ishare2"></a>
 
-💎 Realize a instalação do ISHARE2 executando o comando abaixo:
+- 💎 Realize a instalação do ISHARE2 executando o comando abaixo:
 ```linux
 wget -O /usr/sbin/ishare2 https://raw.githubusercontent.com/ishare2-org/ishare2-cli/main/ishare2 && chmod +x /usr/sbin/ishare2 && ishare2
 ```
 
-## 🚀 Correção do Arquivo CISCOIOUKeygen.py<a id="CISCOIOU"></a>
+## 🚀 Correção do Arquivo CISCOIOUKeygen.py<a id="CiscoIOU"></a>
 ```linux
 #! /usr/bin/python
 print("*********************************************************************")
