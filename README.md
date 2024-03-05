@@ -7,6 +7,7 @@
 - [🚀 Instalação PnetLab](#Pnetlab)
 - [🚀 Instalação do Ishare2](#Ishare2)
 - [🚀 Correção do Arquivo CISCOIOUKeygen.py](#CiscoIOU)
+- [🚀 Instalação do Client Pack](#ClientPack)
 - [🚀Referências](#Ref)
 
 ## 🚀 Instalação PNETLAB<a id="Pnetlab"></a>
@@ -60,6 +61,11 @@ print("[license]\n" + hostname + " = " + iouLicense + ";\n")
 print("You can disable the phone home feature with something like:")
 print(" echo '127.0.0.127 xml.cisco.com' >> /etc/hosts\n")
 ```
+## 🚀 Instalação do Client Pack<a id="ClientPack"></a>
+
+Você pode realizar a instalação do Client Pack e acessar os ativos do laboratório através de softwares como MobaXTerm ou Putty.
+
+***[CLIQUE AQUI](https://github.com/sanderethx/pnetlabv6/blob/main/Instala%C3%A7%C3%A3o%20Client%20Pack.md)&*** para acessar o guia.
 
 ## 🚀 Referências<a id="Ref"></a>
 - **LABHUB:** https://labhub.eu.org
