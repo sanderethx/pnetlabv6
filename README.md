@@ -17,4 +17,3 @@
     </div>
 </body>
 </html>
-Código gerado por IA. Examine e use com cuidado. Mais informações em perguntas frequentes.
