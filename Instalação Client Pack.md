@@ -11,7 +11,7 @@
 
 - 💎 Realize o Download do do client pack através do link:
 ```linux
-https://mega.nz/file/V50gUCQY#ysvjljJrulRT0De96BhIXCEnP2uDkE-zWr7Kyyml3ds
+https://mega.nz/file/G5liXYzK#oaSC1Jrh5m0HaNkReirurtrXhIHGw6NOZX3jgus1xqo
 ```
 
 - 💎 Realize a instalação fazendo as adequações que achar necessárias
