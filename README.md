@@ -21,6 +21,7 @@ https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso
 - 💎 Atualize o Sistema Operacional
 - 💎 Realize a instalação do PnetLab através dos comandos:
 ```linux
+sudo su
 curl -fsSL https://raw.githubusercontent.com/sanderethx/pnetlabv6/refs/heads/main/install-pnetlabv6-ethx.sh | bash
 ```
 
