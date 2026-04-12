@@ -21,7 +21,10 @@ https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso
 - 💎 Atualize o Sistema Operacional
 - 💎 Realize a instalação do PnetLab através do comando:
 ```linux
-bash -c "$(curl -sL https://github.com/sanderethx/pnetlabv6/blob/main/install_pnetlab_v6-ethx.sh)"
+sudo su
+wget https://github.com/sanderethx/pnetlabv6/blob/main/install_pnetlab_v6-ethx.sh
+chmod +x install_pnetlab_v6-ethx.sh
+./install_pnetlab_v6-ethx.sh
 ```
 
 ## 🚀 Instalação do Ishare2<a id="Ishare2"></a>
