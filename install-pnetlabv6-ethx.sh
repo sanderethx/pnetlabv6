@@ -13,6 +13,7 @@ fi
 
 LOG_FILE="/var/log/install-pnetlabv6-ethx.log"
 > "$LOG_FILE"
+rm -f /tmp/pnet_install_success
 
 # Verifica se o Dialog está instalado (utilizado para criar as multiplas caixas simultaneas)
 if ! command -v dialog > /dev/null 2>&1; then
@@ -317,6 +318,7 @@ clear
     update_gauge 100 "Concluído!"
     # Aguarda o log sincronizar
     sleep 1
+    touch /tmp/pnet_install_success
 
 } | (
     LINES=$(tput lines 2>/dev/null || echo 24)
@@ -345,9 +347,11 @@ clear
            --begin $GY $SX --title " Status da Instalacao " --gauge "Iniciando...\nStarting up..." $H2 $W 0
 )
 
-# Se a execução completa não disparou exit de erro no pipe:
-if [ $? -eq 0 ]; then
-    dialog --title "Sucesso!" --msgbox "$MSG_DONE_1\n\n$MSG_DONE_2\n\n--------------------------------------------------------------\n$MSG_DONE_3" 15 80
+# Conclui apenas se a flag de finalização não foi interrompida
+if [ -f /tmp/pnet_install_success ]; then
+    rm -f /tmp/pnet_install_success
+    clear
+    dialog --title "$MSG_TITLE" --msgbox "$MSG_DONE_1\n\n$MSG_DONE_2\n\n--------------------------------------------------------------\n$MSG_DONE_3" 0 0 >/dev/tty </dev/tty
     clear
     reboot
     exit 0
