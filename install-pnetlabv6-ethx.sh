@@ -22,8 +22,8 @@ if ! command -v dialog > /dev/null 2>&1; then
 fi
 
 LANG_OPT=$(dialog --title "PNETLab v6 Installer" --menu "Selecione o Idioma / Select Language\n\n[LOG]: $LOG_FILE" 18 65 2 \
-"English" "US" \
-"PT-BR" "Portugues (Brasil)" 3>&1 1>&2 2>&3)
+"Portugues (Brasil)" "" \
+"English" "" 3>&1 1>&2 2>&3)
 MENU_EXIT=$?
 
 if [ $MENU_EXIT -ne 0 ]; then
@@ -33,7 +33,7 @@ if [ $MENU_EXIT -ne 0 ]; then
     exit 0
 fi
 
-if [ "$LANG_OPT" == "PT-BR" ]; then
+if [ "$LANG_OPT" == "Portugues (Brasil)" ]; then
     MSG_TITLE="Instalador Online PNETLab v6"
     MSG_CHK_UBUNTU="[1/9] Verificando versao do Ubuntu..."
     MSG_UBUNTU_ERR_1="A instalacao foi rejeitada. Este script roda apenas no UBUNTU 20.04"
