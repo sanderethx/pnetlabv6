@@ -1,6 +1,14 @@
 #!/bin/bash
 clear
 # BUILD BY SANDERETHX - YOUTUBE.COM/SANDERETHX
+# Refactored for robust logging and error handling
+
+# -----------------------------------------------------------------------
+# LOGGING SETUP
+# -----------------------------------------------------------------------
+LOG_FILE="/var/log/install_pnetlab_v6.log"
+> "$LOG_FILE"
+echo "Starting PNETLab v6 Installation. Logs will be recorded here." >> "$LOG_FILE"
 
 # -----------------------------------------------------------------------
 # Language Setup / Configuração de Idioma
@@ -32,7 +40,7 @@ if [ "$LANG_OPT" == "2" ]; then
     MSG_INST_DEPS="[7/9] Baixando dependências base do PNETLab..."
     MSG_WAIT_MINUTES="Essa etapa baixa muitos repositórios. Aguarde..."
     MSG_SET_PHP="Configurado o PHP padrao."
-    MSG_OFFLINE_ERR="Falha ao baixar URL ou instalar:"
+    MSG_OFFLINE_ERR="Falha ao tentar baixar ou instalar: "
     MSG_INST_PKGS="[8/9] Instalando Módulos PNETLab da nuvem..."
     MSG_ALREADY_INST="Já instalado, pulando"
     MSG_DOWNLOADING="Baixando:"
@@ -47,6 +55,8 @@ if [ "$LANG_OPT" == "2" ]; then
     MSG_CHK_BASE_INST="Dependências Base Instaladas"
     MSG_CHK_KERNEL="Kernel OK"
     MSG_CHK_PKG="Pacote OK:"
+    MSG_LOG_ERR="Verifique o log em"
+    MSG_CRITICAL="ERRO CRÍTICO"
 else
     MSG_OK="[OK]"
     MSG_FAILED="[FAILED]"
@@ -83,6 +93,8 @@ else
     MSG_CHK_BASE_INST="Base Dependencies Installed"
     MSG_CHK_KERNEL="Kernel OK"
     MSG_CHK_PKG="Package OK:"
+    MSG_LOG_ERR="Check the log at"
+    MSG_CRITICAL="CRITICAL ERROR"
 fi
 
 export LC_ALL=C
@@ -95,13 +107,8 @@ YELLOW='\033[33m'
 NO_COLOR='\033[0m'
 
 # -----------------------------------------------------------------------
-# Basic Checks
+# Utility Functions
 # -----------------------------------------------------------------------
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}${MSG_ROOT_ERR}${NO_COLOR}"
-    exit 1
-fi
-
 check() {
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}    ${MSG_OK} $1${NO_COLOR}"
@@ -109,6 +116,45 @@ check() {
         echo -e "${RED}    ${MSG_FAILED} $1${NO_COLOR}"
     fi
 }
+
+# $1: 1 = exit on fail, 0 = ignore on fail
+# $2: Message to print (if empty, prints nothing)
+# $3...: Command to execute
+run_with_log() {
+    local exit_on_fail=$1
+    local msg="$2"
+    shift 2
+
+    if [ -n "$msg" ]; then
+        echo -n -e "${GREEN}    -> ${msg}... ${NO_COLOR}"
+    fi
+    
+    echo "============= EXECUTING =============" >> "$LOG_FILE"
+    echo "$*" >> "$LOG_FILE"
+    
+    "$@" >> "$LOG_FILE" 2>&1
+    local ret=$?
+    
+    if [ $ret -eq 0 ]; then
+        if [ -n "$msg" ]; then
+            echo -e "${GREEN}${MSG_OK}${NO_COLOR}"
+        fi
+    else
+        if [ -n "$msg" ]; then
+            echo -e "${RED}${MSG_FAILED}${NO_COLOR}"
+        fi
+        if [ "$exit_on_fail" -eq 1 ]; then
+            echo -e "\n${RED}${MSG_CRITICAL}: ${MSG_LOG_ERR} ${LOG_FILE}${NO_COLOR}"
+            exit 1
+        fi
+    fi
+    return $ret
+}
+
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}${MSG_ROOT_ERR}${NO_COLOR}"
+    exit 1
+fi
 
 echo -e "${GREEN}================================================${NO_COLOR}"
 echo -e "${GREEN}   ${MSG_TITLE}         ${NO_COLOR}"
@@ -139,34 +185,33 @@ check "${MSG_UBUNTU_OK}"
 
 # [2/9] DPKG
 echo -e "\n${YELLOW}${MSG_CLEAN_DPKG}${NO_COLOR}"
-rm /var/lib/dpkg/lock* &>/dev/null
-dpkg --configure -a &>/dev/null
+run_with_log 0 "" rm -f /var/lib/dpkg/lock*
+run_with_log 0 "" dpkg --configure -a
 check "${MSG_CHK_DPKG_CONF}"
 
 azure_disk_tune() {
     echo -e "${YELLOW}    ${MSG_AZURE_DISK}${NO_COLOR}"
-    ls -l /dev/disk/by-id/ | grep -q sdc && (
-        echo o; echo n; echo p; echo 1; echo; echo; echo w
-    ) | sudo fdisk /dev/sdc && (
-        mkfs.ext4 -F /dev/sdc1
+    ls -l /dev/disk/by-id/ | grep -q sdc && {
+        ( echo o; echo n; echo p; echo 1; echo; echo; echo w ) | sudo fdisk /dev/sdc >> "$LOG_FILE" 2>&1
+        run_with_log 0 "" mkfs.ext4 -F /dev/sdc1
         echo "/dev/sdc1	/opt	ext4	defaults,discard	0 0" >>/etc/fstab
-        mount /opt
-    )
+        run_with_log 0 "" mount /opt
+    }
     check "${MSG_CHK_AZURE_DISK}"
 }
 uname -a | grep -q -- "-azure " && azure_disk_tune
 
 # [3/9] APT
 echo -e "\n${YELLOW}${MSG_APT_UPDATE}${NO_COLOR}"
-apt-get update -q
+run_with_log 1 "Apt Update" apt-get update -q
 
 # [4/9] SSH Config
 echo -e "\n${YELLOW}${MSG_SSH_CFG}${NO_COLOR}"
-sed -i -e "s/.*PermitRootLogin .*/PermitRootLogin yes/" /etc/ssh/sshd_config &>/dev/null
-sed -i -e 's/.*DefaultTimeoutStopSec=.*/DefaultTimeoutStopSec=5s/' /etc/systemd/system.conf &>/dev/null
-systemctl restart ssh &>/dev/null
+run_with_log 0 "" sed -i -e "s/.*PermitRootLogin .*/PermitRootLogin yes/" /etc/ssh/sshd_config
+run_with_log 0 "" sed -i -e 's/.*DefaultTimeoutStopSec=.*/DefaultTimeoutStopSec=5s/' /etc/systemd/system.conf
+run_with_log 0 "" systemctl restart ssh
 if [ ! -e /opt/ovf/.configured ]; then
-    echo root:pnet | chpasswd &>/dev/null
+    echo root:pnet | chpasswd >> "$LOG_FILE" 2>&1
 fi
 
 # [5/9] Hypervisor
@@ -175,31 +220,32 @@ systemd-detect-virt -v >/tmp/hypervisor
 resize() {
     ROOTLV=$(mount | grep ' / ' | awk '{print $1}')
     echo -e "${GREEN}    ${MSG_ROOT_LV} ${ROOTLV}${NO_COLOR}"
-    lvextend -l +100%FREE "$ROOTLV" &>/dev/null
+    run_with_log 0 "" lvextend -l +100%FREE "$ROOTLV"
     echo -e "${GREEN}    ${MSG_RESIZE_FS}${NO_COLOR}"
-    resize2fs "$ROOTLV" &>/dev/null
+    run_with_log 0 "" resize2fs "$ROOTLV"
 }
 fgrep -e kvm -e none /tmp/hypervisor 2>&1 >/dev/null
 if [[ $? -eq 0 ]]; then
-    grep -q kvm /tmp/hypervisor && resize &>/dev/null
-    grep -q none /tmp/hypervisor && resize &>/dev/null
+    grep -q kvm /tmp/hypervisor && resize
+    grep -q none /tmp/hypervisor && resize
 fi
 
 # [6/9] Remove Conflicting
 echo -e "\n${YELLOW}${MSG_RM_CONFLICTS}${NO_COLOR}"
-apt-get purge -y docker.io containerd runc php8* -q &>/dev/null
-rm /var/lib/dpkg/lock* &>/dev/null
+run_with_log 0 "Removendo dockers e php residuais" bash -c 'apt-get purge -y docker.io containerd runc php8* -q'
+run_with_log 0 "" rm -f /var/lib/dpkg/lock*
 
 # [7/9] Install Dependencies
 echo -e "\n${YELLOW}${MSG_INST_DEPS}${NO_COLOR}"
 echo -e "${YELLOW}    ${MSG_WAIT_MINUTES}${NO_COLOR}"
-apt-get install -y ifupdown unzip &>/dev/null
+run_with_log 1 "Instalando dependencias base (ifupdown unzip)" apt-get install -y ifupdown unzip
 
-# (Note: Using default Ubuntu PHP instead of ondrej/php, as PPA can hang offline/firewalled installs)
-sudo apt install -y resolvconf php7.4 php7.4-yaml php7.4-common php7.4-cli php7.4-curl php7.4-gd php7.4-mbstring php7.4-mysql php7.4-sqlite3 php7.4-xml php7.4-zip libapache2-mod-php7.4 libnet-pcap-perl duc libspice-client-glib-2.0-8 libtinfo5 libncurses5 libncursesw5 php-gd ntpdate vim dos2unix apache2 bridge-utils build-essential cpulimit debconf-utils dialog dmidecode genisoimage iptables lib32gcc1 lib32z1 pastebinit php-xml libc6 libc6-i386 libelf1 libpcap0.8 libsdl1.2debian logrotate lsb-release lvm2 ntp php rsync sshpass autossh php-cli php-imagick php-mysql php-sqlite3 plymouth-label python3-pexpect sqlite3 tcpdump telnet uml-utilities zip libguestfs-tools cgroup-tools libyaml-0-2 php-curl php-mbstring net-tools php-zip python2 libapache2-mod-php mysql-server libavcodec58 libavformat58 libavutil56 libswscale5 libfreerdp-client2-2 libfreerdp-server2-2 libfreerdp-shadow-subsystem2-2 libfreerdp-shadow2-2 libfreerdp2-2 winpr-utils gir1.2-pango-1.0 libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpangoxft-1.0-0 pango1.0-tools pkg-config libssh2-1 libtelnet2 libvncclient1 libvncserver1 libwebsockets15 libpulse0 libpulse-mainloop-glib0 libssl1.1 libvorbis0a libvorbisenc2 libvorbisfile3 libwebp6 libwebpmux3 libwebpdemux2 libcairo2 libcairo-gobject2 libcairo-script-interpreter2 libjpeg62 libpng16-16 libtool libuuid1 libossp-uuid16 default-jdk default-jdk-headless tomcat9 tomcat9-admin tomcat9-docs libaio1 libasound2 libbrlapi0.7 libcacard0 libepoxy0 libfdt1 libgbm1 libgcc-s1 libglib2.0-0 libgnutls30 libibverbs1 libjpeg8 libncursesw6 libnettle7 libnuma1 libpixman-1-0 libpmem1 librdmacm1 libsasl2-2 libseccomp2 libslirp0 libspice-server1 libtinfo6 libusb-1.0-0 libusbredirparser1 libvirglrenderer1 zlib1g qemu-system-common libxenmisc4.11 libcapstone3 libvdeplug2 libnfs13 udhcpd libxss1 libxencall1 libxendevicemodel1 libxenevtchn1 libxenforeignmemory1 libxengnttab1 libxenstore3.0 libxentoollog1 libxentoolcore1 &>/dev/null
+# PHP and enormous package list
+run_with_log 1 "Instalando Core Packages (~300MB)" apt-get install -y resolvconf php7.4 php7.4-yaml php7.4-common php7.4-cli php7.4-curl php7.4-gd php7.4-mbstring php7.4-mysql php7.4-sqlite3 php7.4-xml php7.4-zip libapache2-mod-php7.4 libnet-pcap-perl duc libspice-client-glib-2.0-8 libtinfo5 libncurses5 libncursesw5 php-gd ntpdate vim dos2unix apache2 bridge-utils build-essential cpulimit debconf-utils dialog dmidecode genisoimage iptables lib32gcc1 lib32z1 pastebinit php-xml libc6 libc6-i386 libelf1 libpcap0.8 libsdl1.2debian logrotate lsb-release lvm2 ntp php rsync sshpass autossh php-cli php-imagick php-mysql php-sqlite3 plymouth-label python3-pexpect sqlite3 tcpdump telnet uml-utilities zip libguestfs-tools cgroup-tools libyaml-0-2 php-curl php-mbstring net-tools php-zip python2 libapache2-mod-php mysql-server libavcodec58 libavformat58 libavutil56 libswscale5 libfreerdp-client2-2 libfreerdp-server2-2 libfreerdp-shadow-subsystem2-2 libfreerdp-shadow2-2 libfreerdp2-2 winpr-utils gir1.2-pango-1.0 libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpangoxft-1.0-0 pango1.0-tools pkg-config libssh2-1 libtelnet2 libvncclient1 libvncserver1 libwebsockets15 libpulse0 libpulse-mainloop-glib0 libssl1.1 libvorbis0a libvorbisenc2 libvorbisfile3 libwebp6 libwebpmux3 libwebpdemux2 libcairo2 libcairo-gobject2 libcairo-script-interpreter2 libjpeg62 libpng16-16 libtool libuuid1 libossp-uuid16 default-jdk default-jdk-headless tomcat9 tomcat9-admin tomcat9-docs libaio1 libasound2 libbrlapi0.7 libcacard0 libepoxy0 libfdt1 libgbm1 libgcc-s1 libglib2.0-0 libgnutls30 libibverbs1 libjpeg8 libncursesw6 libnettle7 libnuma1 libpixman-1-0 libpmem1 librdmacm1 libsasl2-2 libseccomp2 libslirp0 libspice-server1 libtinfo6 libusb-1.0-0 libusbredirparser1 libvirglrenderer1 zlib1g qemu-system-common libxenmisc4.11 libcapstone3 libvdeplug2 libnfs13 udhcpd libxss1 libxencall1 libxendevicemodel1 libxenevtchn1 libxenforeignmemory1 libxengnttab1 libxenstore3.0 libxentoollog1 libxentoolcore1
+
 check "${MSG_CHK_BASE_INST}"
 
-update-alternatives --set php /usr/bin/php7.4 &>/dev/null
+run_with_log 0 "" update-alternatives --set php /usr/bin/php7.4
 
 # [8/9] PNET PACKAGES ONLINE DOWNLOAD
 echo -e "\n${YELLOW}${MSG_INST_PKGS}${NO_COLOR}"
@@ -215,18 +261,20 @@ download_url() {
     local EXTRACTION_DIR=$2
     local DEB_NAME=$3
     
-    wget --content-disposition -q --show-progress "$TARGET_URL"
+    wget --content-disposition -q --show-progress "$TARGET_URL" >> "$LOG_FILE" 2>&1
     if [ $? -eq 0 ]; then
         if [ ! -z "$EXTRACTION_DIR" ]; then
             # If it's a zip to extract
-             unzip -o "$EXTRACTION_DIR.zip" &>/dev/null
-             dpkg -i $EXTRACTION_DIR/*.deb &>/dev/null
+             run_with_log 1 "" unzip -o "$EXTRACTION_DIR.zip"
+             run_with_log 1 "" bash -c "dpkg -i $EXTRACTION_DIR/*.deb"
         else
-            dpkg -i $DEB_NAME &>/dev/null
+             run_with_log 1 "" bash -c "dpkg -i $DEB_NAME"
         fi
         check "${MSG_CHK_PKG} $EXTRACTION_DIR$DEB_NAME"
     else
         echo -e "${RED}    [ERROR] ${MSG_OFFLINE_ERR} ($TARGET_URL)${NO_COLOR}"
+        echo "WGET FAILED FOR $TARGET_URL" >> "$LOG_FILE"
+        exit 1
     fi
 }
 
@@ -323,19 +371,19 @@ gcp_tune() {
     echo -e "${YELLOW}    ${MSG_GCP_NET}${NO_COLOR}"
     cd /sys/class/net/ || return 1
     for i in ens*; do echo 'SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="'$(cat $i/address)'", ATTR{type}=="1", KERNEL=="ens*", NAME="'$i'"'; done >/etc/udev/rules.d/70-persistent-net.rules
-    sed -i -e 's/NAME="ens4"/NAME="eth0"/' /etc/udev/rules.d/70-persistent-net.rules
-    sed -i -e 's/ens4/eth0/' /etc/netplan/50-cloud-init.yaml
-    sed -i -e 's/PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-    apt-mark hold linux-image-gcp &>/dev/null
-    mv /boot/vmlinuz-*gcp /root &>/dev/null
-    update-grub2 &>/dev/null
+    run_with_log 0 "" sed -i -e 's/NAME="ens4"/NAME="eth0"/' /etc/udev/rules.d/70-persistent-net.rules
+    run_with_log 0 "" sed -i -e 's/ens4/eth0/' /etc/netplan/50-cloud-init.yaml
+    run_with_log 0 "" sed -i -e 's/PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    run_with_log 0 "" apt-mark hold linux-image-gcp
+    run_with_log 0 "" mv /boot/vmlinuz-*gcp /root
+    run_with_log 0 "" update-grub2
 }
 
 azure_kernel_tune() {
     echo -e "${YELLOW}    ${MSG_AZURE_KERNEL}${NO_COLOR}"
-    apt update &>/dev/null
+    run_with_log 0 "" apt update
     echo "options kvm_intel nested=1 vmentry_l1d_flush=never" >/etc/modprobe.d/qemu-system-x86.conf
-    sed -i -e 's/PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    run_with_log 0 "" sed -i -e 's/PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 }
 
 dmidecode -t bios | grep -q Google && gcp_tune
@@ -343,11 +391,11 @@ uname -a | grep -q -- "-azure " && azure_kernel_tune
 
 # Clean
 echo -e "\n${YELLOW}${MSG_CLEANUP}${NO_COLOR}"
-apt autoremove -y -q &>/dev/null
-apt autoclean -y -q &>/dev/null
+run_with_log 0 "" apt autoremove -y -q
+run_with_log 0 "" apt autoclean -y -q
 
 # Clean build directory
-rm -rf "$BUILD_DIR" &>/dev/null
+run_with_log 0 "" rm -rf "$BUILD_DIR"
 
 echo -e "\n${GREEN}================================================${NO_COLOR}"
 echo -e "${GREEN}   ${MSG_DONE_1}         ${NO_COLOR}"
